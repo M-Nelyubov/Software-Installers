@@ -8,7 +8,7 @@ A collection of PowerShell scripts for automatically installing the latest versi
 2. Open an administrative PowerShell session with the shortcut (Win + X) -> A
 3. Change the directory in the PowerShell terminal to where you downloaded the repository
     - e.g. `cd ~\Documents\GitHub\Software-Installers`
-    - e.g. `cd ~\Downloads\Software-Installers`
+    - e.g. `cd ~\Downloads\Software-Installers-main`
 4. Run the PowerShell scripts for the software you want to install
     - e.g. `.\applications\install-nodeJs.ps1`
 5. Wait for the installation to complete
