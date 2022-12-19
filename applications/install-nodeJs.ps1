@@ -42,3 +42,6 @@ if(!$nodeProducts -or ($nodeProducts.DisplayVersion -ne $nodejsVersion)){
 }else{
     Write-Host "Latest version is already installed: node.js - $nodejsVersion" -ForegroundColor Green
 }
+
+# Refresh Environment Variable
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")

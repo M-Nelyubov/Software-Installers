@@ -59,4 +59,7 @@ if(!$gitProducts -or $installGh){
     msiexec /passive /log "$ghVersion.log" /package $installationFilePath
 }
 
-# TODO: refresh environment variables then run `gh auth login`
+# Refresh Environment Variable
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+
+# TODO: run `gh auth login`

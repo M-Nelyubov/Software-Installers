@@ -35,3 +35,5 @@ if((Test-Path ("~\AppData\Local\GitHubDesktop\GitHubDesktop.exe") -PathType Leaf
     Start-Process -Wait $installationFilePath -Argument "-s"
 }
 
+# Refresh Environment Variable
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")

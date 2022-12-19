@@ -67,3 +67,5 @@ if(Get-InstalledModule | where {$_.Name -eq "PSGraph"}){
     Find-Module PSGraph | Install-Module
 }
 
+# Refresh Environment Variable
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")

@@ -37,3 +37,6 @@ if(!$nppProd -or ($nppProd.DisplayVersion -ne $nppLatestVersion)){
 }else{
     Write-Host "Latest version is already installed: Notepad++ - $nppLatestVersion" -ForegroundColor Green
 }
+
+# Refresh Environment Variable
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")

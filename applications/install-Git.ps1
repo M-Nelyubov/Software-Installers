@@ -67,3 +67,6 @@ if(!$gitProducts -or $installGit){
     $webClient.DownloadFile($gitDownloadLink, $installationFilePath)
     Start-Process -Wait $installationFilePath -ArgumentList @('/VERYSILENT', '/COMPONENTS="icons,ext\reg\shellhere,assoc,assoc_sh"')
 }
+
+# Refresh Environment Variable
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
