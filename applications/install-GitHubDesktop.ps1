@@ -16,8 +16,8 @@ $webClient = (New-Object System.Net.WebClient)
 $webClient.DownloadFile($VersionSite, $webPageFilePath)
 
 ### Execution Section
-$fileData = (Get-Content -Path $webPageFilePath) | where {$_.Contains("releases/tag/release-")} | where {-not $_.Contains("test")} | where {-not $_.Contains("beta")}   # -join "`r`n"
-$fileData = $fileData[0].Replace("'",'"')
+$fileData = (Get-Content -Path $webPageFilePath) | where {$_.Contains("releases/tag/release-")} | where {-not $_.Contains("test")} | where {-not $_.Contains("beta")}
+$fileData = @($fileData)[0].Replace("'",'"')  # Ensure fileData is parsed as an array and then take that array's first element
 $latestGitDesktopVersion = ([xml]$fileData).h2.a."#text".Split("-")[-1]
 ### End of Execution Section
 
