@@ -1,65 +1,85 @@
 <#
 .SYNOPSIS
-    Installs Git for Windows
+    Installs GH
 
 .LINK
     https://cli.github.com/
 #>
 
-param([string]$installationPathRoot = "C:\temp\")
-$webClient = (New-Object System.Net.WebClient)
-$webPageFilePath = $installationPathRoot +"site.html"
+<#
 
+    software-unique configuration
 
-if(-not (Test-Path -Path $installationPathRoot -PathType Container)){
-    Write-Host "Creating $installationPathRoot"
-    mkdir $installationPathRoot
-}
+#>
+$softwareName = "GH"
 
+Function get-LatestVersionData {
+    # Returns an object containing the current version and download URL for the software
+    $VersionSite     = "https://cli.github.com/"
+    $webPageFilePath = "C:\Users\$env:username\AppData\Local\Temp\$softwareName-site.html"    
+    $webClient.DownloadFile($VersionSite, $webPageFilePath)
 
-#Fetch latest version of git 
-$VersionSite = "https://cli.github.com/"
+    $startText = '//github.com/cli/cli/releases/download/v'
+    $fileData = @((Get-Content -Path $webPageFilePath) | foreach {$_.Replace("'",'"')} | where {$_.Contains($startText)} | where {$_.Contains("windows")})[0]
 
-$webClient.DownloadFile($VersionSite, $webPageFilePath)
+    $hr = ([xml]$fileData).a.href
+    $cv = $hr.Split("/")[-1].split("_")[1]
 
-$startText = '//github.com/cli/cli/releases/download/v'
-$endText   = '/'
-
-$fileData = @((Get-Content -Path $webPageFilePath) | foreach {$_.Replace("'",'"')} | where {$_.Contains($startText)} | where {$_.Contains("windows")})[0]
-
-$fileFromStartText = $fileData.Substring($fileData.IndexOf($startText) + $startText.Length)
-$ghVersion = $fileFromStartText.Substring(0, $fileFromStartText.IndexOf($endText))
-
-#Construct git download URL
-$ghDownloadLink = ([xml]$fileData).a.href
-
-#$wmiProductObject = Get-WmiObject Win32_Product
-#$gitProducts = $wmiProductObject | where {$_.Name -and $_.Name.Contains("Node")}
-$gitProducts = Get-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* | where {$_.DisplayName -like "GitHub CLI"}
-
-
-$installGh = $true
-try {
-    $localGhVersion = $gitProducts.DisplayVersion
-    if($localGhVersion -and $localGhVersion.Contains($ghVersion)){
-        $installGh = $false
-        Write-Host "Latest version is already installed: gh - $ghVersion" -ForegroundColor Green
+    [PSCustomObject]@{
+        currentVersion = $cv
+        downloadUrl = $hr
     }
-}catch{
-    $installGh = $true
-    Write-Host "Local instance of gh not found"
+}
+
+Function get-InstalledVersion {
+    <#
+        Returns the version data if the software is installed, and no value otherwise
+    #>
+    Get-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* | where {$_.DisplayName -like "GitHub CLI"} | foreach {$_.DisplayVersion}
+}
+
+Function get-upToDateStatus {
+    (get-LatestVersionData).currentVersion -in (get-InstalledVersion) 
+}
+
+Function install-LatestVersion {
+    param($currentVersion, $downloadUrl)
+    $webPageFilePath = "C:\Users\$env:username\AppData\Local\Temp\$softwareName-$currentVersion.msi"
+    $logFilePath = "C:\Users\$env:username\AppData\Local\Temp\$softwareName-$currentVersion.log"
+    $webClient.DownloadFile($downloadUrl, $webPageFilePath)
+
+    Start-Process msiexec.exe -Wait -ArgumentList @("/passive", "/log", "$logFilePath.log", "/package", $webPageFilePath)
 }
 
 
-# https://silentinstallhq.com/git-silent-install-how-to-guide/
-if(!$gitProducts -or $installGh){
-    Write-Host "Installing GitHub CLI..."
-    $installationFilePath = $installationPathRoot+'gh.msi'
-    $webClient.DownloadFile($ghDownloadLink, $installationFilePath)
-    msiexec /passive /log "$ghVersion.log" /package $installationFilePath
+
+<#
+
+EXECUTION
+
+#>
+
+$webClient = (New-Object System.Net.WebClient)
+$latestData = get-LatestVersionData
+$currentVersion = $latestData.currentVersion
+
+if(get-upToDateStatus){
+    Write-Host -ForegroundColor Green "Latest version is already installed: $softwareName - $currentVersion"
+    exit
 }
 
-# Refresh Environment Variable
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+Write-Host "Installing $softwareName $currentVersion"
+install-LatestVersion -currentVersion $currentVersion -downloadUrl $latestData.downloadUrl
+
+# Verify installation was successful
+if(get-upToDateStatus){
+    Write-Host -ForegroundColor Green "Latest version has been installed: $softwareName - $currentVersion"
+
+	# Refresh Environment Variable after the install
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+} else {
+    Write-Error "Failed to install latest version of $softwareName - $currentVersion"
+}
+
 
 # TODO: run `gh auth login`
