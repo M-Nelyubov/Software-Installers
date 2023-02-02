@@ -45,6 +45,8 @@ Function install-LatestVersion {
     $webClient.DownloadFile($downloadUrl, $webPageFilePath)
     Start-Process -Wait $webPageFilePath -Argument "-s"
 
+    # Sleep for a second to avoid false negative error
+    Start-Sleep 1
 }
 
 
