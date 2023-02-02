@@ -4,12 +4,18 @@
 
 .LINK
 https://nodejs.org/en/
+
 #>
 
+<#
+
+    software-unique configuration
+
+#>
 $softwareName = "Node.js"
 
-# Returns an object containing the current version and download URL for the software
 Function get-LatestVersionData {
+    # Returns an object containing the current version and download URL for the software
     $VersionSite     = "https://nodejs.org/en/"
     $webPageFilePath = "C:\Users\$env:username\AppData\Local\Temp\$softwareName-site.html"    
     $webClient.DownloadFile($VersionSite, $webPageFilePath)
