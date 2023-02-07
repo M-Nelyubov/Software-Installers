@@ -1,47 +1,81 @@
 <#
 .SYNOPSIS
-    Installs Git for Windows
+    Installs Node.js
 
 .LINK
 https://nodejs.org/en/
+
 #>
-param([string]$installationPathRoot = "C:\temp\")
+
+<#
+
+    software-unique configuration
+
+#>
+$softwareName = "Node.js"
+
+Function get-LatestVersionData {
+    # Returns an object containing the current version and download URL for the software
+    $VersionSite     = "https://nodejs.org/en/"
+    $webPageFilePath = "C:\Users\$env:username\AppData\Local\Temp\$softwareName-site.html"    
+    $webClient.DownloadFile($VersionSite, $webPageFilePath)
+    $fileData = Get-Content -Path $webPageFilePath | where {$_ -like "*/dist/v*LTS*"} | foreach {"$_</a>"}
+
+    $cv = ([xml]$fileData).a.'data-version'.Substring(1)
+    
+
+    [PSCustomObject]@{
+        currentVersion = $cv
+        downloadUrl = ([xml]$fileData).a.href + "node-v$cv-x64.msi"
+    }
+}
+
+Function get-InstalledVersion {
+    <#
+        Returns the version data if the software is installed, and no value otherwise
+    #>
+    Get-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* | where {$_.DisplayName -and $_.DisplayName.Contains("Node")} | foreach {$_.DisplayVersion}
+}
+
+Function get-upToDateStatus {
+    (get-LatestVersionData).currentVersion -in (get-InstalledVersion) 
+}
+
+Function install-LatestVersion {
+    param($currentVersion, $downloadUrl)
+    $webPageFilePath = "C:\Users\$env:username\AppData\Local\Temp\$softwareName-$currentVersion.msi"
+    $logFilePath = "C:\Users\$env:username\AppData\Local\Temp\$softwareName-$currentVersion.log"
+    $webClient.DownloadFile($downloadUrl, $webPageFilePath)
+
+    start-process msiexec.exe -Wait -ArgumentList @("/passive", "/log", "$logFilePath.log", "/package", $webPageFilePath)
+}
+
+
+
+<#
+
+EXECUTION
+
+#>
+
 $webClient = (New-Object System.Net.WebClient)
-$webPageFilePath = $installationPathRoot +"site.html"
+$latestData = get-LatestVersionData
+$currentVersion = $latestData.currentVersion
 
-#Fetch latest version of nodejs
-$VersionSite = "https://nodejs.org/en/"
-$webClient.DownloadFile($VersionSite, $webPageFilePath)
-
-$fileData = (Get-Content -Path $webPageFilePath) | where {$_.Contains("nodejs.org/dist/v")}
-if($fileData.GetType().BaseType.Name -eq "Array"){
-    $fileData = $fileData[0]
+if(get-upToDateStatus){
+    Write-Host -ForegroundColor Green "Latest version is already installed: $softwareName - $currentVersion"
+    exit
 }
 
+Write-Host "Installing $softwareName $currentVersion"
+install-LatestVersion -currentVersion $currentVersion -downloadUrl $latestData.downloadUrl
 
-$fileData = $fileData.Substring($fileData.IndexOf("dist/v")+"dist/v".Length)
-$fileData = $fileData.Substring(0,$fileData.IndexOf("/"))
+# Verify installation was successful
+if(get-upToDateStatus){
+    Write-Host -ForegroundColor Green "Latest version has been installed: $softwareName - $currentVersion"
 
-$nodejsVersion = $fileData
-
-#construct node download URLs
-$nodejsDownloadBase = 'https://nodejs.org/dist/v'+$nodejsVersion+'/'
-$nodejsFile = 'node-v'+$nodejsVersion+'-x64.msi'
-$nodejsDownloadLink = $nodejsDownloadBase+$nodejsFile
-$nodejsFileFull = "$installationPathRoot\$nodejsFile"
-
-#check currently installed version in registry
-$nodeProducts = Get-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* | where {$_.DisplayName -and $_.DisplayName.Contains("Node")}
-
-# Install if not already at latest
-if(!$nodeProducts -or ($nodeProducts.DisplayVersion -ne $nodejsVersion)){
-    Write-Host "Installing node.js..."
-    #SRC: https://gist.github.com/manuelbieh/4178908#file-win32-node-installer
-    $webClient.DownloadFile($nodejsDownloadLink, $nodejsFileFull)
-    msiexec /passive /log "$nodejsVersion.log" /package $nodejsFileFull
-}else{
-    Write-Host "Latest version is already installed: node.js - $nodejsVersion" -ForegroundColor Green
+	# Refresh Environment Variable after the install
+	$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+} else {
+    Write-Error "Failed to install latest version of $softwareName - $currentVersion"
 }
-
-# Refresh Environment Variable
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
