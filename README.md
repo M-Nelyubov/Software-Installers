@@ -12,8 +12,7 @@ A collection of PowerShell scripts for automatically installing the latest versi
 4. Run the PowerShell scripts for the software you want to install
     - e.g. `.\applications\install-nodeJs.ps1`
 5. Wait for the installation to complete
-6. Test the installation to make sure it worked
-    - e.g. `node --version` will return the latest version of node.js if it was successfully installed
+6. You're done! Run the installed software to make sure everything is working as desired.
 
 ## Error Handling
 
