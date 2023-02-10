@@ -19,7 +19,9 @@ A collection of PowerShell scripts for automatically installing the latest versi
 1. Open PowerShell as an Administrator
 2. Run the following command:
 ```ps1
-$dp="~/AppData/Local/Temp/install-Git.ps1"; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/M-Nelyubov/Software-Installers/main/applications/install-Git.ps1" -UseBasicParsing | foreach {$_.Content} | Set-Content -Path $dp; Unblock-File $dp; Set-ExecutionPolicy Unrestricted -Scope Process -Force; Start-Process -Wait powershell.exe -ArgumentList $dp -NoNewWindow; $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User"); mkdir ~\Documents\GitHub\ -ErrorAction SilentlyContinue; cd "~\Documents\GitHub\"; git clone https://github.com/M-Nelyubov/Software-Installers.git
+
+$dp="~/AppData/Local/Temp/install-Git.ps1"; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/M-Nelyubov/Software-Installers/main/applications/install-Git.ps1" -UseBasicParsing | foreach {$_.Content} | Set-Content -Path $dp; Unblock-File $dp; Set-ExecutionPolicy Unrestricted -Scope Process -Force; Start-Process -Wait powershell.exe -ArgumentList $dp -NoNewWindow; $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User"); mkdir ~\Documents\GitHub\ -ErrorAction SilentlyContinue; cd "~\Documents\GitHub\"; git clone https://github.com/M-Nelyubov/Software-Installers.git; cd ./Software-Installers; git pull; Write-Host "`nAvailable Applications: "; ls .\applications\ | foreach {$_.Name}
+
 ```
 3. Run the PowerShell scripts for the software you want to install
     - e.g. `.\applications\install-nodeJs.ps1`
