@@ -62,25 +62,28 @@ Function install-LatestVersion {
 EXECUTION
 
 #>
+Function main {
+    $webClient = (New-Object System.Net.WebClient)
+    $latestData = get-LatestVersionData
+    $currentVersion = $latestData.currentVersion
 
-$webClient = (New-Object System.Net.WebClient)
-$latestData = get-LatestVersionData
-$currentVersion = $latestData.currentVersion
+    if(get-upToDateStatus){
+        Write-Host -ForegroundColor Green "Latest version is already installed: $softwareName - $currentVersion"
+        exit
+    }
 
-if(get-upToDateStatus){
-    Write-Host -ForegroundColor Green "Latest version is already installed: $softwareName - $currentVersion"
-    exit
+    Write-Host "Installing $softwareName $currentVersion"
+    install-LatestVersion -currentVersion $currentVersion -downloadUrl $latestData.downloadUrl
+
+    # Verify installation was successful
+    if(get-upToDateStatus){
+        Write-Host -ForegroundColor Green "Latest version has been installed: $softwareName - $currentVersion"
+
+        # Refresh Environment Variable after the install
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+    } else {
+        Write-Error "Failed to install latest version of $softwareName - $currentVersion"
+    }
 }
 
-Write-Host "Installing $softwareName $currentVersion"
-install-LatestVersion -currentVersion $currentVersion -downloadUrl $latestData.downloadUrl
-
-# Verify installation was successful
-if(get-upToDateStatus){
-    Write-Host -ForegroundColor Green "Latest version has been installed: $softwareName - $currentVersion"
-
-	# Refresh Environment Variable after the install
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
-} else {
-    Write-Error "Failed to install latest version of $softwareName - $currentVersion"
-}
+if($MyInvocation.InvocationName -ne ".") {main}
