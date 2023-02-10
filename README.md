@@ -15,7 +15,8 @@ A collection of PowerShell scripts for automatically installing the latest versi
 5. Wait for the installation to complete
 6. You're done! Run the installed software to make sure everything is working as desired.
 
-### Option 2: Automated Install
+### Option 2: Automated download and installation of Git
+This will automatically download and run the script to install Git for Windows, thus allowing the rest of the commands to clone the entire repository down, allowing you to then seamlessly install any other desired software.
 1. Open PowerShell as an Administrator
 2. Run the following command:
 ```ps1
