@@ -2,6 +2,7 @@
 A collection of PowerShell scripts for automatically installing the latest versions of some software
  
 ## How to run
+### Option 1: Manual Install
 1. Download the repository locally. Examples:
     - Use an existing installation of Git to clone the repository `git clone https://github.com/MSNelyubov/Software-Installers.git`
     - Download and extract the repository as a [zip file here](https://github.com/MSNelyubov/Software-Installers/archive/refs/heads/main.zip).
@@ -13,6 +14,20 @@ A collection of PowerShell scripts for automatically installing the latest versi
     - e.g. `.\applications\install-nodeJs.ps1`
 5. Wait for the installation to complete
 6. You're done! Run the installed software to make sure everything is working as desired.
+
+### Option 2: Automated download and installation of Git
+This will automatically download and run the script to install Git for Windows, thus allowing the rest of the commands to clone the entire repository down, allowing you to then seamlessly install any other desired software.
+1. Open PowerShell as an Administrator
+2. Run the following command:
+```ps1
+
+$dp="~/AppData/Local/Temp/install-Git.ps1"; Invoke-WebRequest -Uri "https://raw.githubusercontent.com/M-Nelyubov/Software-Installers/main/applications/install-Git.ps1" -UseBasicParsing | foreach {$_.Content} | Set-Content -Path $dp; Unblock-File $dp; Set-ExecutionPolicy Unrestricted -Scope Process -Force; Start-Process -Wait powershell.exe -ArgumentList $dp -NoNewWindow; $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User"); mkdir ~\Documents\GitHub\ -ErrorAction SilentlyContinue; cd "~\Documents\GitHub\"; git clone https://github.com/M-Nelyubov/Software-Installers.git; cd ./Software-Installers; git pull; Write-Host "`nAvailable Applications: "; ls .\applications\ | foreach {$_.Name}
+
+```
+3. Run the PowerShell scripts for the software you want to install
+    - e.g. `.\applications\install-nodeJs.ps1`
+4. Wait for the installation to complete
+5. You're done! Run the installed software to make sure everything is working as desired.
 
 ## Error Handling
 
