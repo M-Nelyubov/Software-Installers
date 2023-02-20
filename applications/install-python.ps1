@@ -68,14 +68,15 @@ EXECUTION
 
 $webClient = (New-Object System.Net.WebClient)
 $latestData = get-LatestVersionData
+$currentVersion = $latestData.currentVersion
 
 if(get-upToDateStatus){
-    Write-Host -ForegroundColor Green "Latest version is already installed: $softwareName - $($latestData.currentVersion)"
+    Write-Host -ForegroundColor Green "Latest version is already installed: $softwareName - $currentVersion"
     exit
 }
 
-Write-Host "Installing $softwareName $($latestData.currentVersion)"
-install-LatestVersion -currentVersion $latestData.currentVersion -downloadUrl $latestData.downloadUrl
+Write-Host "Installing $softwareName $currentVersion"
+install-LatestVersion -currentVersion $currentVersion -downloadUrl $latestData.downloadUrl
 
 # Verify installation was successful
 if(get-upToDateStatus){
