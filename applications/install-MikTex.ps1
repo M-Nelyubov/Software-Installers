@@ -50,7 +50,7 @@ Function install-LatestVersion {
     $webPageFilePath = "C:\Users\$env:username\AppData\Local\Temp\$softwareName-$currentVersion.exe"
     $webClient.DownloadFile($downloadUrl, $webPageFilePath)
 
-#    Start-Process -FilePath $webPageFilePath -ArgumentList "--unattended" -Wait
+    Start-Process -FilePath $webPageFilePath -ArgumentList "--unattended" -Wait
 }
 
 
