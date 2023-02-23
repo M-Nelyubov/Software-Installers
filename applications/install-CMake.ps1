@@ -34,7 +34,7 @@ Function get-InstalledVersion {
 }
 
 Function get-upToDateStatus {
-    (get-LatestVersionData).currentVersion -in (get-InstalledVersion)
+    (get-LatestVersionData).currentVersion -in (get-InstalledVersion) -and ($env:Path -like "*$softwareName*")
 }
 
 Function install-LatestVersion {
@@ -43,7 +43,7 @@ Function install-LatestVersion {
     $logFilePath = "C:\Users\$env:username\AppData\Local\Temp\$softwareName-$currentVersion.log"
     $webClient.DownloadFile($downloadUrl, $webPageFilePath)
 
-    Start-Process msiexec.exe -Wait -ArgumentList @("/passive", "/log", "$logFilePath.log", "/package", $webPageFilePath)
+    Start-Process msiexec.exe -Wait -ArgumentList @("/passive", "ADD_CMAKE_TO_PATH=System", "/log", "$logFilePath.log", "/package", $webPageFilePath)
 }
 
 
@@ -66,12 +66,12 @@ if(get-upToDateStatus){
 Write-Host "Installing $softwareName $currentVersion"
 install-LatestVersion -currentVersion $currentVersion -downloadUrl $latestData.downloadUrl
 
+# Refresh Environment Variable after the install
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
+
 # Verify installation was successful
 if(get-upToDateStatus){
     Write-Host -ForegroundColor Green "Latest version has been installed: $softwareName - $currentVersion"
-
-	# Refresh Environment Variable after the install
-	$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 } else {
     Write-Error "Failed to install latest version of $softwareName - $currentVersion"
 }
