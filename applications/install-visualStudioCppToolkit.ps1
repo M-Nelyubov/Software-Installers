@@ -1,6 +1,21 @@
 ﻿<#
 .SYNOPSIS
     Installs the desktop development with C++ toolkit for Visual Studio 2022
+
+.LINK
+    https://learn.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2022#desktop-development-with-c
+
+.LINK
+    https://learn.microsoft.com/en-us/answers/questions/192162/visual-studio-build-tools-silent-install
+
+.LINK
+    https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022
+
+.LINK
+    https://datasheets.raspberrypi.com/pico/getting-started-with-pico.pdf
+
+.LINK
+    https://github.com/ArmDeveloperEcosystem/microphone-library-for-pico#building
 #>
 
 <#

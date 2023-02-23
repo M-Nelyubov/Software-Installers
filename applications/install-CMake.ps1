@@ -1,6 +1,9 @@
 ﻿<#
 .SYNOPSIS
     Installs CMake
+
+.LINK
+    https://silentinstallhq.com/cmake-silent-install-how-to-guide/
 #>
 
 <#
