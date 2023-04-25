@@ -15,14 +15,14 @@ $softwareName = "Anaconda"
 
 Function get-LatestVersionData {
     # Returns an object containing the current version and download URL for the software
-    $VersionSite     = "https://www.anaconda.com/products/distribution#Downloads"
+    $VersionSite     = "https://www.anaconda.com/download#Downloads"
     $webPageFilePath = "C:\Users\$env:username\AppData\Local\Temp\$softwareName-site.html"    
     $webClient.DownloadFile($VersionSite, $webPageFilePath)
 
-    $fileData = @((Get-Content -Path $webPageFilePath) | where {$_.Contains("Windows")} | where {$_.Contains("anaconda")})[0]
+    $fileData = @((Get-Content -Path $webPageFilePath) | where {$_ -like "*Windows*"} | where {$_ -like "*anaconda.com/archive/Anacond*"})[-1]
 
-    $hr = ([xml]"<a $fileData />").a.href
-    $cv = $hr.Split("/")[-1].split("-")[1]
+    $hr = $fileData.Split("'")[1]
+    $cv = $hr.split("-")[1]
 
     [PSCustomObject]@{
         currentVersion = $cv
@@ -38,7 +38,7 @@ Function get-InstalledVersion {
 }
 
 Function get-upToDateStatus {
-    (get-LatestVersionData).currentVersion -in (get-InstalledVersion) 
+    (get-InstalledVersion) -like "*$((get-LatestVersionData).currentVersion)*"
 }
 
 Function install-LatestVersion {
